@@ -56,4 +56,9 @@ class Worker:
                 raise KeyError('GitHubWorker: file {0} not found'.format(name))
 
     def save(self, names):
-        pass
+        os.system('cd {0} && git pull -q'.format(self.link))
+        for name in names:
+            with open('{0}/{1}.json'.format(self.link, name), 'w') as db_file:
+                db_file.write(json.dumps(self.__getattribute__(name)))
+                os.system('git add {0}/{1}.json'.format(self.link, name))
+        os.system('cd {0} && git commit -qam "Save {1}" && git push -q'.format(self.link, str(names)))
