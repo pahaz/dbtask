@@ -1,3 +1,5 @@
 import gitdata.github.larpy.dbtask as db
 
-print(db.info())
+db.load(['users'])
+print(db.users)
+assert db.users == [{"name": "Pahaz"}, {"name": "Test"}], 'users did not loaded'

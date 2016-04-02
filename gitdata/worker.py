@@ -1,8 +1,8 @@
 """
 This module allows you to use github.com as database.
 """
+import json
 import os
-
 
 __author__ = 'Trofimov Igor'
 
@@ -35,6 +35,8 @@ class Worker:
     def clone_repository(self):
         if self._check_local_repository() is None:
             return None
+        if self._check_local_repository():
+            return True
         os.system('git clone -q git@github.com:{0}.git {0}'.format(self.link))
         if self._check_local_repository():
             return True
@@ -45,7 +47,13 @@ class Worker:
                 'repository': self.repository}
 
     def load(self, names):
-        pass
+        os.system('cd {0} && git pull -q'.format(self.link))
+        for name in names:
+            if os.path.exists('{0}/{1}.json'.format(self.link, name)):
+                with open('{0}/{1}.json'.format(self.link, name), 'r') as db_file:
+                    self.__setattr__(name, json.loads(db_file.read()))
+            else:
+                raise KeyError('GitHubWorker: file {0} not found'.format(name))
 
     def save(self, names):
         pass
