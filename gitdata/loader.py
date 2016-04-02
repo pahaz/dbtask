@@ -57,8 +57,13 @@ class GitHubLoader:
         elif len(name) == 4:
             from . import worker
             module = worker.Worker(name[2], name[3])
-            sys.modules.setdefault(fullname, module)
-            return module
+            check = module.clone_repository()
+            if check is None:
+                raise ImportError('GitHubLoader: dir {0}/{1} already exists'.format(name[2], name[3]))
+            elif check:
+                sys.modules.setdefault(fullname, module)
+                return module
+            raise ImportError('GitHubLoader: bad user name {0} or repository name {1}'.format(name[2], name[3]))
         raise ImportError('GitHubLoader: bad module name {0}'.format(fullname))
 
 

@@ -1,3 +1,3 @@
-import gitdata.github.data.name as db
+import gitdata.github.larpy.dbtask as db
 
 print(db.info())
