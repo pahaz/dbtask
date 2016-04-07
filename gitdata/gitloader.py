@@ -68,10 +68,8 @@ class GITLoader(object):
             if i in self.__loaded:
                 self.__save(i)
                 t += "{}.{} ".format(i, self.__loaded[i])
-        
-        print("git add {}".format(t, os.devnull))
 
-        if os.system("git add {}".format(t, os.devnull)):
+        if os.system("git add {} >{}".format(t, os.devnull)):
             raise OSError("GITLoader: git can't add file from list")
 
         if os.system("git commit -m \"GITLoader: add {}\" -q".format(t)):
@@ -80,7 +78,7 @@ class GITLoader(object):
         if os.system("ssh-agent ssh-add {} >{}".format("id_rsa", os.devnull)):
             raise OSError("GITLoader: Can't add id_rsa")
 
-        if os.system("git push origin"):
+        if os.system("git push origin >{}".format(os.devnull)):
             raise ConnectionError("GITLoader: Can't connect to repo")
 
         os.chdir(curpath)
