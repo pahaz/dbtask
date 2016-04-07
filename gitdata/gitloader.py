@@ -32,8 +32,9 @@ class GITLoader(object):
             if os.system("git clone {} -q".format(self.__gitpath)):
                 t = "GITLoader: git can't clone repo: {}".format(gitpath)
                 raise ConnectionError(t)
-            t = "git remote add origin ssh://git@github.com:{}/{}.git >{}"
+            t = "git remote set-url origin ssh://git@github.com:{}/{}.git >{}"
             os.system(t.format(u, d, os.devnull))
+        os.system("git config --global push.default simple >{}".format(os.devnull))
         os.chdir(curpath)
 
     def load(self, listpath):
@@ -75,10 +76,10 @@ class GITLoader(object):
         if os.system("git commit -m \"GITLoader: add {}\" -q".format(t)):
             raise OSError("GITLoader: Something goes wrong :-(")
 
-        if os.system("ssh-agent ssh-add {} >{}".format("id_rsa", os.devnull)):
+        if os.system("ssh-agent ssh-add {} 2>{}".format("id_rsa", os.devnull)):
             raise OSError("GITLoader: Can't add id_rsa")
 
-        if os.system("git push origin >{}".format(os.devnull)):
+        if os.system("git push origin 2>{}".format(os.devnull, os.devnull)):
             raise ConnectionError("GITLoader: Can't connect to repo")
 
         os.chdir(curpath)
@@ -97,7 +98,6 @@ class GITLoader(object):
             return json.load(fin)
 
     def __json_save(self, path, obj):
-        print(path)
         with open(path, 'w') as fout:
             json.dump(obj, fout)
 

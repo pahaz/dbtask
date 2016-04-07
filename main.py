@@ -1,13 +1,13 @@
 #!/usr/bin/python3
 
 # Computer #1
-import gitdata.github.pahaz.dbtask as db
-db.load(['users'])
-assert db.users == [{"name": "Pahaz"}, {"name": "Test"}], 'users did not loaded'
-db.users.append({"name": "NewUser"})
-db.save(['users'])
+import gitdata.github.KVSrep.dbtask as db
+db.load(['temp/users'])
+assert db.temp.users == [{"name": "Pahaz"}, {"name": "Test"}], 'users did not loaded'
+db.temp.users.append({"name": "NewUser"})
+db.save(['temp/users'])
 
 # Computer #2
-import gitdata.github.pahaz.dbtask as db
-db.load(['users'])
-assert db.users == [{"name": "Pahaz"}, {"name": "Test"}, {"name": "NewUser"}], 'new users did not loaded'
+import gitdata.github.KVSrep.dbtask as db
+db.load(['temp/users'])
+assert db.temp.users == [{"name": "Pahaz"}, {"name": "Test"}, {"name": "NewUser"}], 'new users did not loaded'
