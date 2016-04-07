@@ -23,14 +23,17 @@ class GITLoader(object):
         if d in os.listdir():
             os.chdir(d)
             if os.system("git pull -q -r"):
-                t = "GITLoader: git can't pull repo: {}".format(gitpath)
-                raise ConnectionError(t)
+                os.chdir("..")
+                os.system('rmdir /S /Q \"{}\"'.format(d))
+                if os.system("git clone {} -q".format(self.__gitpath)):
+                    t = "GITLoader: git can't clone repo: {}".format(gitpath)
+                    raise ConnectionError(t)
         else:
             if os.system("git clone {} -q".format(self.__gitpath)):
                 t = "GITLoader: git can't clone repo: {}".format(gitpath)
                 raise ConnectionError(t)
-            t = "git remote add origin ssh://git@github.com:{}/{}.git -q"
-            os.system(t.format(u, d))
+            t = "git remote add origin ssh://git@github.com:{}/{}.git >{}"
+            os.system(t.format(u, d, os.devnull))
         os.chdir(curpath)
 
     def load(self, listpath):
@@ -39,8 +42,9 @@ class GITLoader(object):
             for tp in GITLoader.__types:
                 fullpath = "{}/{}.{}".format(self.__modulepath, i, tp)
                 if self.__check_exists(fullpath):
-                    ld = GITLoader.__types[tp](self, fullpath, i)
+                    ld = GITLoader.__types[tp][0](self, fullpath)
                     OK = True
+                    break
             if OK:
                 p = i.split("/")
                 k = self
@@ -50,6 +54,7 @@ class GITLoader(object):
                         setattr(k, j, t)
                     k = getattr(k, j)
                 setattr(k, p[-1], ld)
+                self.__loaded[i] =  tp
             else:
                 print("Can't load {}", i)
 
@@ -60,9 +65,13 @@ class GITLoader(object):
         
         t = ""
         for i in listpath:
-            t += "{} ".format(i)
+            if i in self.__loaded:
+                self.__save(i)
+                t += "{}.{} ".format(i, self.__loaded[i])
         
-        if os.system("git add -q {}".format(t)):
+        print("git add {}".format(t, os.devnull))
+
+        if os.system("git add {}".format(t, os.devnull)):
             raise OSError("GITLoader: git can't add file from list")
 
         if os.system("git commit -m \"GITLoader: add {}\" -q".format(t)):
@@ -71,14 +80,28 @@ class GITLoader(object):
         if os.system("ssh-agent ssh-add {} >{}".format("id_rsa", os.devnull)):
             raise OSError("GITLoader: Can't add id_rsa")
 
-        if os.system("git push origin")
+        if os.system("git push origin"):
+            raise ConnectionError("GITLoader: Can't connect to repo")
 
         os.chdir(curpath)
 
+    def __save(self, fl):
+        p = fl.split("/")
+        k = self
+        for i in p:
+            k = getattr(k, i)
+        if fl in self.__loaded:
+            fullpath = "{}/{}.{}".format(self.__modulepath, fl, self.__loaded[fl])
+            self.__types[self.__loaded[fl]][1](self, fullpath, k)
 
-    def __json_load(self, path, name):
+    def __json_load(self, path):
         with open(path) as fin:
             return json.load(fin)
+
+    def __json_save(self, path, obj):
+        print(path)
+        with open(path, 'w') as fout:
+            json.dump(obj, fout)
 
     def __check_exists(self, fullpath):
         try:
@@ -88,8 +111,9 @@ class GITLoader(object):
         return True
 
     __types = {
-        'json': __json_load
+        'json': (__json_load, __json_save)
     }
+    __loaded = {}
 
 class LoaderProperty():
     def __init__(self):
