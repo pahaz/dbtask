@@ -13,15 +13,10 @@ class GitHubFinder:
     """
 
     @classmethod
-    def find_module(cls, fullname: str, path: None = None) -> object:
+    def find_module(cls, fullname: 'Строка имени модуля для поиска',
+                    path: 'Строка пути' = None) -> 'Класс загрузчика модуля GitHubLoader':
         """
         Find our module
-
-        :param path: Nothing interesting
-        :type fullname: str
-        :param fullname: Module's full name in search
-        :rtype: GitHubLoader class
-        :return: GitHubLoader class
         """
         name = fullname.split('.')
         if 'gitdata' in name and 'github' in name:
@@ -34,17 +29,14 @@ class GitHubLoader:
     """
 
     @classmethod
-    def load_module(cls, fullname: str) -> object:
+    def load_module(cls, fullname: 'Строка имени модуля для поиска') -> 'Объект загруженного модуля':
         """
         Load our module
-
-        :type fullname: str
-        :param fullname: Module's full name in search
-        :rtype: types.ModuleType or Worker class
-        :return: module
         """
         name = fullname.split('.')
 
+        # FIXME Занести исключения в worker
+        # FIXME Тут может возникнуть еще куча исключений
         if 'gitdata' not in name or 'github' not in name:
             raise ImportError('GitHubLoader: bad module name {0}'.format(fullname))
         if len(name) < 4:
