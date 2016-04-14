@@ -4,6 +4,8 @@ This module allows you to initialize database.
 import sys
 import types
 
+from . import worker
+
 __author__ = 'Trofimov Igor'
 
 
@@ -47,7 +49,6 @@ class GitHubLoader:
             sys.modules.setdefault(fullname, module)
             return module
         elif len(name) == 4:
-            from . import worker
             module = worker.Worker(name[2], name[3])
             check = module.clone_repository()
             if check is None:

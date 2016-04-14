@@ -19,8 +19,14 @@ class Worker:
         """
         self.username = username
         self.repository = repository
-        # FIXME Заменить на property
-        self.link = "{0}/{1}".format(username, repository)
+        self.__link = "{0}/{1}".format(username, repository)
+
+    @property
+    def link(self) -> 'Строка пути до удаленного репозитория':
+        """
+        Read path to remote repository.
+        """
+        return self.__link
 
     def _check_local_repository(self) -> 'Логический результат проверки возможности загрузки данных из репозитория':
         """
@@ -68,6 +74,7 @@ class Worker:
         """
         Update files from github.com adn load database files to attributes.
         """
+        # FIXME Заменить на subprocess
         os.system('cd {0} && git pull -q'.format(self.link))
         for name in names:
             if os.path.exists('{0}/{1}.json'.format(self.link, name)):
